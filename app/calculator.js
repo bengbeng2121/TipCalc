@@ -57,6 +57,7 @@ export default class Calculator extends Component {
                     <View>
                         <SegmentedControlTab
                             values={this.tipValues()}
+                            selectedIndex={this.state.segmentSelectedIndex}
                             onTabPress={index => this.handleSegmentChange(index)}
                         />
                     </View>
