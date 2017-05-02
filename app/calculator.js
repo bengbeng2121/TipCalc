@@ -9,6 +9,7 @@ import {
     AsyncStorage
 } from "react-native";
 import SegmentedControlTab from "react-native-segmented-control-tab";
+import {FormattedNumber, FormattedCurrency} from 'react-native-globalize';
 
 export default class Calculator extends Component {
 
@@ -51,7 +52,9 @@ export default class Calculator extends Component {
                     </View>
 
                     <View style={{paddingBottom: 10}}>
-                        <Text style={styles.label}>Tip amount: {this.state.tipAmount}</Text>
+                        <Text style={styles.label}>
+                            Tip amount: <FormattedNumber value={this.state.tipAmount} style={{color: 'red'}}/>
+                        </Text>
                     </View>
 
                     <View>
