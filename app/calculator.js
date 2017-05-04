@@ -9,7 +9,9 @@ import {
     AsyncStorage
 } from "react-native";
 import SegmentedControlTab from "react-native-segmented-control-tab";
-import {FormattedNumber, FormattedCurrency} from 'react-native-globalize';
+import I18n from 'react-native-i18n';
+
+I18n.locale = "vi-VI";
 
 export default class Calculator extends Component {
 
@@ -53,7 +55,7 @@ export default class Calculator extends Component {
 
                     <View style={{paddingBottom: 10}}>
                         <Text style={styles.label}>
-                            Tip amount: <FormattedNumber value={this.state.tipAmount} style={{color: 'red'}}/>
+                            Tip amount: {this.formatCurrency(this.state.tipAmount)}
                         </Text>
                     </View>
 
@@ -68,11 +70,11 @@ export default class Calculator extends Component {
                     <View>
                         <View style={styles.result}>
                             <Text>Bill amount: </Text>
-                            <Text>{this.state.billAmount}</Text>
+                            <Text>{this.formatCurrency(this.state.billAmount)}</Text>
                         </View>
                         <View style={styles.result}>
                             <Text>Tip amount: </Text>
-                            <Text>{this.state.tipAmount}</Text>
+                            <Text>{this.formatCurrency(this.state.tipAmount)}</Text>
                         </View>
                         <View style={styles.result}>
                             <Text>Percent: </Text>
@@ -82,15 +84,34 @@ export default class Calculator extends Component {
 
                     <View style={[styles.result, {paddingTop: 10}]}>
                         <Text style={{fontWeight: 'bold'}}>Result: </Text>
-                        <Text style={{fontWeight: 'bold'}}>{this.state.result}</Text>
+                        <Text style={{fontWeight: 'bold'}}>{this.formatCurrency(this.state.result)}</Text>
                     </View>
                 </View>
             </TouchableWithoutFeedback>
         );
     }
 
+    formatCurrency(value) {
+        let options;
+        if (I18n.currentLocale() == "vi-VI") {
+            options = {
+                unit: "đ",
+                separator: ",",
+                delimiter: ".",
+                sign_first: false
+            };
+        } else {
+            options = {
+                unit: "$",
+                separator: ".",
+                delimiter: ",",
+                sign_first: true
+            };
+        }
+        return I18n.toCurrency(value, options);
+    }
+
     tipValues() {
-        //this.getPercentages();
         return [this.state.percent1, this.state.percent2, this.state.percent3];
     }
 
@@ -142,8 +163,32 @@ export default class Calculator extends Component {
         }
     }
 
+    async getCurrency() {
+        try {
+            let currency = await AsyncStorage.getItem("CURRENCY");
+            if (currency) {
+                this.setState({currency: currency});
+                I18n.locale = currency;
+            } else {
+                currency = I18n.currentLocale();
+                this.setCurrency(currency);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async setCurrency(currency) {
+        try {
+            await AsyncStorage.setItem('CURRENCY', currency);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     componentDidMount() {
         this.getPercentages();
+        this.getCurrency();
     }
 }
 

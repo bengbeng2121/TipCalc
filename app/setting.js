@@ -10,6 +10,7 @@ import {
     Modal,
     Slider
 } from "react-native";
+import I18n from 'react-native-i18n';
 
 export default class Setting extends Component {
 
@@ -17,6 +18,7 @@ export default class Setting extends Component {
         super(props);
         this.state = {
             sceneTransition: "FloatFromRight",
+            currency: "vi-VI",
             modalVisible: false,
             percent1: 10,
             percent2: 15,
@@ -32,7 +34,7 @@ export default class Setting extends Component {
                     <Picker
                         style={styles.picker}
                         selectedValue={this.state.sceneTransition}
-                        onValueChange={(scene) => this.setSelectSceneTransition(scene)}>
+                        onValueChange={(scene) => this.setSelectedSceneTransition(scene)}>
                         <Picker.Item label="FloatFromRight" value="FloatFromRight"/>
                         <Picker.Item label="FloatFromLeft" value="FloatFromLeft"/>
                         <Picker.Item label="FloatFromBottom" value="FloatFromBottom"/>
@@ -40,6 +42,16 @@ export default class Setting extends Component {
                         <Picker.Item label="SwipeFromLeft" value="SwipeFromLeft"/>
                         <Picker.Item label="HorizontalSwipeJump" value="HorizontalSwipeJump"/>
                         <Picker.Item label="HorizontalSwipeJumpFromRight" value="HorizontalSwipeJumpFromRight"/>
+                    </Picker>
+                </View>
+                <View style={styles.itemContainer}>
+                    <Text style={styles.itemTitle}>Currency</Text>
+                    <Picker
+                        style={styles.picker}
+                        selectedValue={this.state.currency}
+                        onValueChange={(currency) => this.setSelectedCurrency(currency)}>
+                        <Picker.Item label="VND" value="vi-VI"/>
+                        <Picker.Item label="USD" value="en-EN"/>
                     </Picker>
                 </View>
                 <TouchableOpacity onPress={() => {
@@ -121,7 +133,7 @@ export default class Setting extends Component {
         }
     }
 
-    setSelectSceneTransition(scene) {
+    setSelectedSceneTransition(scene) {
         try {
             this.setSceneTransition(scene);
         } catch (error) {
@@ -147,9 +159,34 @@ export default class Setting extends Component {
         }
     }
 
+    setSelectedCurrency(currency) {
+        this.setCurrency(currency);
+    }
+
+    async setCurrency(currency) {
+        try {
+            await AsyncStorage.setItem('CURRENCY', currency);
+            this.setState({currency: currency});
+            I18n.locale = currency;
+        } catch (error) {
+            console.log("Hmm, something went wrong when set data..." + error);
+        }
+    }
+
+    async getCurrency() {
+        try {
+            let currency = await AsyncStorage.getItem("CURRENCY");
+            this.setState({currency: currency});
+        } catch (error) {
+            console.log("Hmm, something went wrong when get data..." + error);
+        }
+    }
+
+    //TODO separate into utils class to get async
     componentDidMount() {
         this.getSceneTransition();
         this.getPercentages();
+        this.getCurrency();
     }
 }
 
